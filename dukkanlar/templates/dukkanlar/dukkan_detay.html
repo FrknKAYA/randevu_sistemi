@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="text-center mb-0">{{ dukkan.ad|upper }}</h2>
+      </div>
+      <div class="card-body">        
+        <div class="mb-3">
+          <label class="form-label"><strong>Adres:</strong></label>
+          <p class="text-muted">{{ dukkan.adres }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label"><strong>Telefon:</strong></label>
+          <p><a href="tel:{{ dukkan.telefon }}" class="text-decoration-none">{{ dukkan.telefon }}</a></p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label"><strong>Açık Günler:</strong></label>
+          <p class="text-muted">
+            {% for gun in dukkan.calisma_gunleri.all %}
+              {{ gun.ad }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+          <label class="form-label"><strong>Saat:</strong></label>
+          <p class="text-muted">{{ dukkan.acilis_saati }} - {{ dukkan.kapanis_saati }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label"><strong>Berberler:</strong></label>
+          <ul class="list-group">
+            {% for berber in dukkan.berberler.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">              
+              {% if user.is_authenticated and user == dukkan.sahibi and berber.is_active %}                
+                <a href="{% url 'berber_randevulari' berber.id %}" class="text-decoration-none">{{ berber.get_full_name|title }}</a>                
+              {% else %}                
+                <a href="#" class="text-decoration-none {% if not berber.is_active %}link-danger{% endif %}">{{ berber.get_full_name|title }}</a>
+              {% endif %}
+              {% if user.is_authenticated and user == dukkan.sahibi %}
+              <form method="post" action="{% url 'berber_durum_degistir' berber.id %}" style="display: inline;">
+                {% csrf_token %}
+                {% if dukkan.sahibi == berber %}{% else %}
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="berber-{{ berber.id }}" 
+                         {% if berber.is_active %}checked{% endif %} onchange="this.form.submit()">
+                  <label class="form-check-label" for="berber-{{ berber.id }}">
+                    {% if berber.is_active %}{% else %}{% endif %}
+                  </label>
+                </div>
+                {% endif %}
+              </form>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="d-grid gap-2 col-12 mx-auto mt-4">
+          {% if user.is_authenticated and user == dukkan.sahibi %}
+            <a href="{% url 'dukkan_ayarlari' dukkan.id %}" class="btn btn-primary">Dükkan Ayarları</a>
+            <a href="{% url 'berber_ekle' dukkan.id %}" class="btn btn-primary">Berber Ekle</a>            
+          {% endif %}
+          
+          {% if user.is_authenticated %}
+            <a href="{% url 'musteri_listesi' dukkan.id %}" class="btn btn-primary">Müşteri Listesi</a>
+            <a href="{% url 'dukkan_randevu_listesi' dukkan.id %}" class="btn btn-outline-primary">Randevu Listesini Görüntüle</a>
+            <a href="{% url 'musteri_ekle' %}" class="btn btn-outline-primary">Müşteri Ekle</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

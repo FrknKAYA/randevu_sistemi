@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="musteriFormContent">
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Use the form instance to render the form fields -->
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>{{ dukkan.ad }} - Randevu Listesi</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Berber</th>
+        <th>Tarih</th>
+        <th>Saat</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for randevu in randevular %}
+        <tr>
+          <td>{{ randevu.berber }}</td>
+          <td>{{ randevu.tarih }}</td>
+          <td>{{ randevu.saat }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

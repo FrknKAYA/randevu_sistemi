@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="text-center mb-0">{{ dukkan.ad }}</h2>
+        <h2 class="text-center mb-0">Randevu Listesi</h2>
+      </div>
+      {% for randevu in randevular %}
+      <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ randevu.musteri }}</h5>
+            <p class="card-text">
+              <strong>Berber:</strong> {{ randevu.berber.get_full_name }}<br>
+              <strong>Tarih:</strong> {{ randevu.tarih }}<br>
+              <strong>Saat:</strong> {{ randevu.saat }}
+            </p>
+            <div class="d-flex justify-content-between">
+              <a href="{% url 'randevu_detay' randevu.id %}" class="btn btn-primary btn-sm">Detay</a>
+              <a href="{% url 'randevu_sil' randevu.id %}" class="btn btn-danger btn-sm">Sil</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+</div>
+{% endblock %}

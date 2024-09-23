@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block extra_head %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">{% endblock extra_head %}
+{% block content %}
+<div class="my-1">  
+  <div class="card text-center shadow-lg mx-1">
+    <div class="card-body">
+        <h2 class="card-title text-primary">{{ berber.get_full_name }}</h2>
+        <p class="card-text text-secondary">{{ bugun|date:"d E Y" }}</p>
+        <p class="card-text text-secondary">{{ bugun|date:"l" }}</p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between my-3 px-1">
+    <a href="{% url 'berber_randevulari' berber.id %}?yil={{ onceki_gun.year }}&ay={{ onceki_gun.month }}&gun={{ onceki_gun.day }}" class="btn btn-outline-primary">Önceki Gün</a> 
+    <form id="tarih-secim-formu" method="get" action="{% url 'berber_randevulari' berber.id %}">
+      <input type="text" id="tarih-secim-input" name="tarih" class="form-control" placeholder="Tarih Seçin">
+    </form>
+    <a href="{% url 'berber_randevulari' berber.id %}?yil={{ sonraki_gun.year }}&ay={{ sonraki_gun.month }}&gun={{ sonraki_gun.day }}" class="btn btn-outline-primary">Sonraki Gün</a> 
+  </div>
+
+  <div class="row">
+    {% if bugun.weekday in calisma_gunleri %}
+      {% for slot in randevu_slotlari %}
+        <div class="col-12 mb-2">
+          <div class="card {% if slot.durum == 'Boş' %}border-success{% else %}border-danger{% endif %}">
+            <div class="card-body">
+              <h5 class="card-title text-center">{{ slot.saat }}</h5>
+              <p class="card-text">
+                {% if slot.durum == 'Boş' %}
+                  <a href="{% url 'randevu_olustur_slot' bugun slot.saat berber.id %}" class="btn btn-success w-100">Boş</a>
+                {% else %}
+                  <a href="{% url 'randevu_detay' slot.durum.randevu_id %}" class="btn btn-danger w-100">Dolu</a>
+                  <p class="h6 text-center">{{ slot.durum.musteri_adi }}</p>                  
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="alert alert-warning text-center" role="alert">
+          Bugün çalışmıyorsunuz.
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+<script>
+  flatpickr("#tarih-secim-input", {
+    locale: "tr",
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d-m-Y", // Görünen tarih formatı
+    defaultDate: "{{ bugun|date:'Y-m-d' }}",
+    firstDayOfWeek: 1,
+    onChange: function(selectedDates, dateStr, instance) {
+        const selectedDate = selectedDates[0];
+        const year = selectedDate.getFullYear();
+        const month = selectedDate.getMonth() + 1;
+        const day = selectedDate.getDate();
+        const queryParams = `?yil=${year}&ay=${month}&gun=${day}`;
+        const baseUrl = window.location.pathname;
+        const newUrl = `/randevular/berber/{{ berber.id }}/randevular/${queryParams}`;
+        window.location.href = newUrl;
+    }
+});
+</script>
+{% endblock extra_js %}

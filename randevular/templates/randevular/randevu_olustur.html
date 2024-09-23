@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="row mt-1">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="text-center mb-0">Randevu Oluştur</h2>
+      </div>
+      <div class="card-body p-1 mt-2">
+        {% if messages %}
+        <div class="alert alert-danger">          
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}          
+        </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <button type="button" class="btn btn-outline-secondary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#musteriEkleModal">Yeni Müşteri Ekle</button>   
+            <label for="{{ randevu_form.musteri.id_for_label }}" class="form-label"><strong>Müşteri:</strong></label>                     
+            {{ randevu_form.musteri }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ randevu_form.tarih.id_for_label }}" class="form-label"><strong>Tarih:</strong></label>
+            {{ randevu_form.tarih }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ randevu_form.saat.id_for_label }}" class="form-label"><strong>Saat:</strong></label>
+            {{ randevu_form.saat }}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ randevu_form.berber.id_for_label }}" class="form-label"><strong>Berber:</strong></label>
+            {{ randevu_form.berber }}
+          </div>
+
+          {{ randevu_form.dukkan }} 
+
+          <button type="submit" class="btn btn-primary w-100">Randevu Oluştur</button>          
+        </form>
+        
+        <h2>{{ randevu.tarih }}</h2> 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Müşteri Ekle Modal -->
+<div class="modal fade" id="musteriEkleModal" tabindex="-1" aria-labelledby="musteriEkleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="musteriEkleModalLabel">Yeni Müşteri Ekle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="musteriEkleForm">
+          {% csrf_token %}
+          <div id="musteriFormContent">
+            <!-- Müşteri formu burada yüklenecek -->
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+        <button type="button" class="btn btn-primary" id="musteriKaydetButton" data-dismiss="modal">Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Select2 JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var timeInput = document.querySelector('input[type="time"]');
+
+    timeInput.addEventListener('input', function() {
+      var timeValue = this.value;
+      var hour = parseInt(timeValue.split(':')[0]);
+      var minute = parseInt(timeValue.split(':')[1]);
+
+      if (minute !== 0 && minute !== 30) {
+        minute = minute < 30 ? 0 : 30;
+        this.value = hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
+      }
+
+      if (hour < 8 || hour > 22) {
+        hour = hour < 8 ? 8 : 22;
+        this.value = hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
+      }
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function() {
+    $('#id_musteri').select2({
+        placeholder: "Müşteri seçin",
+        allowClear: true
+    });
+
+    $('#musteriEkleModal').on('shown.bs.modal', function () {
+        $.get("{% url 'musteri_ekle_form' %}", function(data) {
+            $("#musteriFormContent").html($(data).find("#musteriFormContent").html());
+        });
+    });
+
+    $('#musteriKaydetButton').on('click', function() {
+      var form = $('#musteriEkleForm');
+      $.ajax({
+        url: "{% url 'musteri_ekle_form' %}",
+        type: "POST",
+        data: form.serialize(),
+        success: function(response) {
+          // AJAX isteği başarılı olursa:
+          if (typeof response === 'object' && response.hasOwnProperty('message')) { 
+            // Başarılı JSON yanıtı işleme
+            $('#musteriEkleModal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            var newOption = new Option(response.musteri_adi, response.musteri_id, true, true);
+            $('#id_musteri').append(newOption).trigger('change.select2');
+          } else {
+            // HTML yanıtı işleme (örneğin hata mesajları)
+            $("#musteriFormContent").html($(response).find("#musteriFormContent").html()); 
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX isteği hatası:", error);
+        }
+      });
+    });
+});
+</script>
+{% endblock %}

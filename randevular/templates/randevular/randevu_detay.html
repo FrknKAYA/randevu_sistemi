@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h2 class="text-center mb-0">Randevu Detayları</h2>
+      </div>
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><strong>Müşteri:</strong></label>
+              <p><a href="{% url "musteri_detay" randevu.dukkan.id randevu.musteri.id %}" class="text-decoration-none">{{ randevu.musteri }}</a></p>
+            </div>
+            <div class="mb-3">
+              {% if randevu.musteri.telefon %}
+              <label class="form-label"><strong>Telefon:</strong></label>              
+                <p><a href="tel:{{ randevu.musteri.telefon }}" class="text-decoration-none">{{ randevu.musteri.telefon }}</a></p>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label"><strong>Berber:</strong></label>
+              <p><a href="{% url "berber_randevu_listesi" %}" class="text-decoration-none">{{ randevu.berber.get_full_name }}</a></p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label"><strong>Dükkan:</strong></label>
+              <p><a href="{% url "dukkan_randevu_listesi" randevu.dukkan.id %}" class="text-decoration-none">{{ randevu.dukkan }}</a></p>          
+            </div>
+          </div>
+          <div class="col-md-6">            
+            <div class="mb-3">
+              <label class="form-label"><strong>Tarih:</strong></label>
+              <p>{{ randevu.tarih }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label"><strong>Saat:</strong></label>
+              <p>{{ randevu.saat }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trigger the modal with this button -->
+        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+          Randevuyu Sil
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="confirmDeleteModalLabel">Randevuyu Sil</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              Randevuyu silmek istediğinize emin misiniz?
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+              <a href="{% url 'randevu_sil' randevu.id %}" class="btn btn-danger">Evet, Sil</a>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
